@@ -1,16 +1,25 @@
-# This is a sample Python script.
+from tkinter import *
+from PIL import Image, ImageDraw
+import PIL
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+WIDTH, HEIGHT = 500, 500
+CENTER = WIDTH // 2
+WHITE = (255,255,255)
+
+class PaintGUI:
+    def __init__(self):
+        self.root = Tk()
+        self.root.title('Better Paint')
+
+        self.brush_width = 15
+        self.current_color = '#000000'
+
+        self.cnv = Canvas(self.root, width=WIDTH-10, height = HEIGHT-10, bg ='white')
+        self.cnv.pack()
+        self.cnv.bind("B1-Motion", self.paint)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+if __name__ == "__main__":
+    app = PaintGUI()
+    app.root.mainloop()
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
