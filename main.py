@@ -2,6 +2,7 @@ from tkinter import *
 import ttkbootstrap as ttk
 from PIL import Image, ImageDraw
 import PIL
+from time import time
 
 WIDTH, HEIGHT = 500, 500
 CENTER = WIDTH // 2
@@ -9,15 +10,20 @@ WHITE = (255,255,255)
 
 class PaintGUI:
     def __init__(self):
+        self.last_click_time = 0
+        self.interpolation_threshold = 0.1
+        self.interpolation_amount = 20
+
         self.window = ttk.Window(themename = 'journal')
+        #self.window = Tk()
         self.window.title('Better Paint')
 
-        self.brush_width = 15
+        self.brush_width = 5
         self.current_color = '#000000'
 
         self.cnv = Canvas(self.window, width=WIDTH-10, height = HEIGHT-10, bg ='white')
         self.cnv.pack()
-        self.cnv.bind("B1-Motion", self.paint)
+        self.cnv.bind("<B1-Motion>", self.paint)
 
         self.image = PIL.Image.new("RGB", (WIDTH, HEIGHT), WHITE)
         self.draw = ImageDraw.Draw(self.image)
@@ -40,11 +46,44 @@ class PaintGUI:
 
         self.window.protocol('WM_DELETE_WINDOW', self.on_closing)
 
-    def paint(self):
-        pass
+    def paint(self, event):
+        # Get the current time
+        current_time = time()
+
+        # Get the current mouse position
+        x2, y2 = event.x, event.y
+
+        # Initialize or update previous mouse position
+        if not hasattr(self, 'prev_x') or not hasattr(self, 'prev_y'):
+            self.prev_x, self.prev_y = x2, y2
+
+        # If the time since the last click is too long, reset the previous mouse position
+        if current_time - self.last_click_time > self.interpolation_threshold:
+            self.prev_x, self.prev_y = x2, y2
+
+        # Draw a line between the current and previous mouse positions
+        self.cnv.create_line(self.prev_x, self.prev_y, x2, y2, fill=self.current_color, width=self.brush_width)
+        self.draw.line([self.prev_x, self.prev_y, x2, y2], fill=self.current_color, width=self.brush_width)
+
+        # Interpolate between consecutive mouse positions
+        for i in range(1, self.interpolation_amount + 1):
+            # Calculate intermediate point coordinates
+            interp_x = self.prev_x + (x2 - self.prev_x) * i / (self.interpolation_amount + 1)
+            interp_y = self.prev_y + (y2 - self.prev_y) * i / (self.interpolation_amount + 1)
+
+            # Draw a line between the previous and intermediate points
+            self.cnv.create_line(self.prev_x, self.prev_y, interp_x, interp_y, fill=self.current_color, width=self.brush_width)
+            self.draw.line([self.prev_x, self.prev_y, interp_x, interp_y], fill=self.current_color, width=self.brush_width)
+
+        # Update previous mouse position for next iteration
+        self.prev_x, self.prev_y = x2, y2
+
+        # Update last click time
+        self.last_click_time = current_time
 
     def clear(self):
-        pass
+        self.cnv.delete("all")
+        self.draw.rectangle([0,0,1000,1000], fill="white")
 
     def save(self):
         pass
