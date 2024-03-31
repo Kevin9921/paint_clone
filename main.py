@@ -1,5 +1,6 @@
 from tkinter import *
 import ttkbootstrap as ttk
+#from tkinter import filedialog,
 from PIL import Image, ImageDraw
 import PIL
 from time import time
@@ -11,18 +12,21 @@ WHITE = (255,255,255)
 class PaintGUI:
     def __init__(self):
         self.last_click_time = 0
-        self.interpolation_threshold = 0.1
+        self.interpolation_threshold = 0.05
         self.interpolation_amount = 20
 
         self.window = ttk.Window(themename = 'journal')
         #self.window = Tk()
         self.window.title('Better Paint')
+        self.window.configure(bg = 'grey')
+        self. window.geometry("800x800")
 
         self.brush_width = 5
         self.current_color = '#000000'
 
         self.cnv = Canvas(self.window, width=WIDTH-10, height = HEIGHT-10, bg ='white')
-        self.cnv.pack()
+        self.cnv.pack(pady = 50)
+        #self.cnv.pack(fill=BOTH, expand=True)
         self.cnv.bind("<B1-Motion>", self.paint)
 
         self.image = PIL.Image.new("RGB", (WIDTH, HEIGHT), WHITE)
@@ -34,6 +38,7 @@ class PaintGUI:
         self.btn_frame.columnconfigure(0, weight=1)
         self.btn_frame.columnconfigure(1, weight=1)
         self.btn_frame.columnconfigure(2, weight=1)
+        self.btn_frame.columnconfigure(3, weight=1)
 
         self.clear_btn = Button(self.btn_frame, text="Clear", command = self.clear)
         self.clear_btn.grid(row=0, column=0, sticky=W+E)
@@ -43,6 +48,9 @@ class PaintGUI:
 
         self.bplus_btn = Button(self.btn_frame, text="B+", command=self.brush_plus)
         self.bplus_btn.grid(row=0, column=2, sticky=W+E)
+
+        self.bminus_btn = Button(self.btn_frame, text="B-", command=self.brush_minus)
+        self.bminus_btn.grid(row=0, column=3, sticky=W+E)
 
         self.window.protocol('WM_DELETE_WINDOW', self.on_closing)
 
@@ -89,7 +97,10 @@ class PaintGUI:
         pass
 
     def brush_plus(self):
-        pass
+        self.brush_width += 1
+
+    def brush_minus(self):
+        self.brush_width -= 1
 
     def on_closing(self):
         pass
