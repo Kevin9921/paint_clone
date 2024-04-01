@@ -17,6 +17,8 @@ class PaintGUI:
         self.interpolation_amount = 15
         self.fileName = ""
         self.fileExt = ""
+        self.Canvas_line = []
+        self.Pillow_line = []
 
         self.window = ttk.Window(themename = 'journal')
         #self.window = Tk()
@@ -31,9 +33,15 @@ class PaintGUI:
         self.cnv.pack(pady = 50)
         #self.cnv.pack(fill=BOTH, expand=True)
         self.cnv.bind("<B1-Motion>", self.paint)
+        self.cnv.bind("<ButtonRelease-1>", self.paint_stop)
 
         self.image = PIL.Image.new("RGB", (WIDTH, HEIGHT), WHITE)
         self.draw = ImageDraw.Draw(self.image)
+
+        self.output_string = ttk.StringVar()
+        self.output_string.set(str(self.brush_width))
+        self.output_label = ttk.Label(master = self.window, textvariable=self.output_string)
+        self.output_label.pack()
 
         self.btn_frame = Frame(self.window)
         self.btn_frame.pack(fill=X)
@@ -55,11 +63,39 @@ class PaintGUI:
         self.bminus_btn = Button(self.btn_frame, text="B-", command=self.brush_minus)
         self.bminus_btn.grid(row=0, column=3, sticky=W+E)
 
+        self.color_btn = Button(self.btn_frame, text="Colour", command=self.change_colour)
+        self.color_btn.grid(row=1, column=1, sticky=W+E)
+
+        self.undo_btn = Button(self.btn_frame, text="Undo", command=self.undo_btn)
+        self.undo_btn.grid(row=1, column=0, sticky=W+E)
+
         self.window.protocol('WM_DELETE_WINDOW', self.on_closing)
+
+    def undo_btn(self):
+        line1 = self.Canvas_line.pop()
+        line2 = self.Pillow_line.pop()
+
+        print("this is line 1", line1)
+        for i in line1:
+            print(line1)
+            self.cnv.delete(line1[0])
+            self.cnv.delete(line1[1])
+        #self.cnv.delete(line1[1])
+
+
+
+    def update_brush_size(self):
+        self.output_string.set(self.brush_width)
+
+    def paint_stop(self, event):
 
     def paint(self, event):
         # Get the current time
         current_time = time()
+        cnv_line = []
+        pil_line = []
+        cnv_int_line = []
+        pil_int_line = []
 
         # Get the current mouse position
         x2, y2 = event.x, event.y
@@ -73,8 +109,8 @@ class PaintGUI:
             self.prev_x, self.prev_y = x2, y2
 
         # Draw a line between the current and previous mouse positions
-        self.cnv.create_line(self.prev_x, self.prev_y, x2, y2, fill=self.current_color, width=self.brush_width)
-        self.draw.line([self.prev_x, self.prev_y, x2, y2], fill=self.current_color, width=self.brush_width)
+        cnv_line.append(self.cnv.create_line(self.prev_x, self.prev_y, x2, y2, fill=self.current_color, width=self.brush_width))
+        pil_line.append(self.draw.line([self.prev_x, self.prev_y, x2, y2], fill=self.current_color, width=self.brush_width))
 
         # Interpolate between consecutive mouse positions
         for i in range(1, self.interpolation_amount + 1):
@@ -83,8 +119,14 @@ class PaintGUI:
             interp_y = self.prev_y + (y2 - self.prev_y) * i / (self.interpolation_amount + 1)
 
             # Draw a line between the previous and intermediate points
-            self.cnv.create_line(self.prev_x, self.prev_y, interp_x, interp_y, fill=self.current_color, width=self.brush_width)
-            self.draw.line([self.prev_x, self.prev_y, interp_x, interp_y], fill=self.current_color, width=self.brush_width)
+            cnv_int_line.append(self.cnv.create_line(self.prev_x, self.prev_y, interp_x, interp_y, fill=self.current_color, width=self.brush_width))
+            pil_int_line.append(self.draw.line([self.prev_x, self.prev_y, interp_x, interp_y], fill=self.current_color, width=self.brush_width))
+
+
+        self.Canvas_line.append((cnv_line,cnv_int_line))
+        #print(cnv_line)
+        print(self.Canvas_line)
+        self.Pillow_line.append((pil_line,pil_int_line))
 
         # Update previous mouse position for next iteration
         self.prev_x, self.prev_y = x2, y2
@@ -113,10 +155,18 @@ class PaintGUI:
             self.image.save(filename)
 
     def brush_plus(self):
-        self.brush_width += 1
+        if self.brush_width < 10:
+            self.brush_width += 1
+            self.update_brush_size()
+
 
     def brush_minus(self):
-        self.brush_width -= 1
+        if self.brush_width > 1:
+            self.brush_width -= 1
+            self.update_brush_size()
+
+    def change_colour(self):
+        _, self.current_color = colorchooser.askcolor(title="Choose A color")
 
     def on_closing(self):
         answer = messagebox.askyesnocancel("Quit", "Do you want to save your work", parent=self.window)
