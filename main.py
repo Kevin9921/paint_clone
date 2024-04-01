@@ -16,6 +16,7 @@ class PaintGUI:
         self.interpolation_threshold = 0.05
         self.interpolation_amount = 15
         self.fileName = ""
+        self.fileExt = ""
 
         self.window = ttk.Window(themename = 'journal')
         #self.window = Tk()
@@ -98,9 +99,10 @@ class PaintGUI:
     def save(self):
         if self.fileName == "":
             filename = filedialog.asksaveasfilename(parent = self.window,
-                                                initialfile="untitled.png",
-                                                defaultextension = "png",
-                                                filetypes=[("PNG","JPG"), (".png", ".jpg")])
+                                                    initialfile="untitled.png",
+                                                    defaultextension = "png",
+                                                    filetypes=[("PNG", ".png"), ("JPG", ".jpg")])
+            self.fileExt = filename
             self.fileName = os.path.basename(filename)
         else:
             filename = filedialog.asksaveasfilename(parent=self.window,
@@ -122,13 +124,19 @@ class PaintGUI:
         if answer is not None:
             if answer:
                 if self.fileName != "":
-                    self.image.save(self.fileName)
+                    try:
+                        self.image.save(self.fileExt)
+                        print("Image saved successfully to:", self.fileName)
+                    except Exception as e:
+                        print("Error saving image:", e)
                 else:
                     filename = filedialog.asksaveasfilename(parent=self.window,
                                                             initialfile="untitled.png",
                                                             defaultextension="png",
-                                                            filetypes=[("PNG", "JPG"), (".png", ".jpg")])
-                if filename:
+                                                            filetypes=[("PNG", ".png"), ("JPG", ".jpg")])
+                    if filename:
+                        self.image.save(filename)
+                if filename or self.fileName:
                     self.window.destroy()
                     exit(0)
             else:
