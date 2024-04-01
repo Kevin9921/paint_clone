@@ -1,9 +1,10 @@
 from tkinter import *
 import ttkbootstrap as ttk
-#from tkinter import filedialog,
+from tkinter import filedialog, messagebox, colorchooser
 from PIL import Image, ImageDraw
 import PIL
 from time import time
+import os
 
 WIDTH, HEIGHT = 500, 500
 CENTER = WIDTH // 2
@@ -14,6 +15,7 @@ class PaintGUI:
         self.last_click_time = 0
         self.interpolation_threshold = 0.05
         self.interpolation_amount = 20
+        self.fileName = ""
 
         self.window = ttk.Window(themename = 'journal')
         #self.window = Tk()
@@ -94,7 +96,19 @@ class PaintGUI:
         self.draw.rectangle([0,0,1000,1000], fill="white")
 
     def save(self):
-        pass
+        if self.fileName == "":
+            filename = filedialog.asksaveasfilename(parent = self.window,
+                                                initialfile="untitled.png",
+                                                defaultextension = "png",
+                                                filetypes=[("PNG","JPG"), (".png", ".jpg")])
+            self.fileName = os.path.basename(filename)
+        else:
+            filename = filedialog.asksaveasfilename(parent=self.window,
+                                                    initialfile=self.fileName,
+                                                    defaultextension="png",
+                                                    filetypes=[("PNG", ".png"), ("JPG", ".jpg")])
+        if filename != "":
+            self.image.save(filename)
 
     def brush_plus(self):
         self.brush_width += 1
