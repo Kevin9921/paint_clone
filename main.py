@@ -14,7 +14,7 @@ class PaintGUI:
     def __init__(self):
         self.last_click_time = 0
         self.interpolation_threshold = 0.05
-        self.interpolation_amount = 20
+        self.interpolation_amount = 15
         self.fileName = ""
 
         self.window = ttk.Window(themename = 'journal')
@@ -117,7 +117,26 @@ class PaintGUI:
         self.brush_width -= 1
 
     def on_closing(self):
-        pass
+        answer = messagebox.askyesnocancel("Quit", "Do you want to save your work", parent=self.window)
+        filename = None
+        if answer is not None:
+            if answer:
+                if self.fileName != "":
+                    self.image.save(self.fileName)
+                else:
+                    filename = filedialog.asksaveasfilename(parent=self.window,
+                                                            initialfile="untitled.png",
+                                                            defaultextension="png",
+                                                            filetypes=[("PNG", "JPG"), (".png", ".jpg")])
+                if filename:
+                    self.window.destroy()
+                    exit(0)
+            else:
+                self.window.destroy()
+                exit(0)
+
+
+
 
 if __name__ == "__main__":
     app = PaintGUI()
