@@ -19,6 +19,7 @@ class PaintGUI:
         self.fileExt = ""
         self.Canvas_line = []
         self.Pillow_line = []
+        self.single_line = []
 
         self.window = ttk.Window(themename = 'journal')
         #self.window = Tk()
@@ -71,16 +72,17 @@ class PaintGUI:
 
         self.window.protocol('WM_DELETE_WINDOW', self.on_closing)
 
+    #used to undo lines in the canvas
     def undo_btn(self):
-        line1 = self.Canvas_line.pop()
-        line2 = self.Pillow_line.pop()
+        if self.single_line:
+            line1 = self.single_line.pop()
+            line2 = self.Pillow_line.pop()
 
-        print("this is line 1", line1)
-        for i in line1:
-            print(line1)
-            self.cnv.delete(line1[0])
-            self.cnv.delete(line1[1])
-        #self.cnv.delete(line1[1])
+            print("this is undo", line1)
+            for segment in line1:
+                self.cnv.delete(segment[0])
+                for coord in segment[1]:
+                    self.cnv.delete(coord)
 
 
 
@@ -88,6 +90,11 @@ class PaintGUI:
         self.output_string.set(self.brush_width)
 
     def paint_stop(self, event):
+        #print("button stop")
+        self.single_line.append(self.Canvas_line.copy())
+        print("paint stop line",self.Canvas_line)
+        print("paint stop line 2", self.single_line)
+        self.Canvas_line.clear()
 
     def paint(self, event):
         # Get the current time
@@ -125,7 +132,7 @@ class PaintGUI:
 
         self.Canvas_line.append((cnv_line,cnv_int_line))
         #print(cnv_line)
-        print(self.Canvas_line)
+        #print(self.Canvas_line)
         self.Pillow_line.append((pil_line,pil_int_line))
 
         # Update previous mouse position for next iteration
@@ -136,6 +143,8 @@ class PaintGUI:
 
     def clear(self):
         self.cnv.delete("all")
+
+        self.single_line.clear()
         self.draw.rectangle([0,0,1000,1000], fill="white")
 
     def save(self):
