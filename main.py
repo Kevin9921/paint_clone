@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 import PIL
 from time import time
 import os
+import tkinter.font as tkfont
 import pyautogui
 
 WIDTH, HEIGHT = 700, 500
@@ -53,6 +54,7 @@ class PaintGUI:
         s.configure('TFrame', background='#282526')
 
         self.brush_width = 5
+
         self.current_color = '#000000'
 
         self.wrapper = ttk.Frame(self.window)
@@ -62,10 +64,95 @@ class PaintGUI:
 
         # self.btn_frame = Frame(self.window, borderwidth=5, relief=tk.RAISED)
         # self.btn_frame.pack(fill=X)
-        self.btn_frame = Frame(self.wrapper, borderwidth=5, relief=tk.RAISED)
-        self.btn_frame.pack(fill=X)
 
-        self.cnv = Canvas(self.wrapper, width=WIDTH-10, height = HEIGHT-10, bg ='white')
+        self.output_string = ttk.StringVar()
+        self.output_string.set(str(self.brush_width))
+
+        # self.output_label.grid(row=2, column=2, sticky=W+E)
+
+        s.configure("Frame4.TFrame", background="light blue")
+
+        self.btn_frame = ttk.Frame(self.wrapper, style="Frame4.TFrame")
+        self.btn_frame.pack(fill='both')
+
+        for col in range(9):
+            self.btn_frame.columnconfigure(col, weight=1)
+        self.btn_frame.rowconfigure(1, weight=1)
+
+        # draw frame
+        s.configure("Frame1.TFrame", background="blue")
+        s.configure("Frame2.TFrame", background="red")
+        s.configure("Frame3.TFrame", background="green")
+
+        # self.draw_frame = ttk.Frame(self.btn_frame, style="Frame1.TFrame")
+        # self.draw_frame.grid(row=0,column=0, sticky='ew')
+
+        self.clear_btn = ttk.Button(self.btn_frame, text="Clear", command=self.clear)
+        # self.clear_btn.pack(fill ='x', padx=5, pady=5, side=LEFT)
+        self.clear_btn.grid(row=0, column=0, sticky='ew', padx=5, pady=5)
+
+        self.undo_btn = ttk.Button(self.btn_frame, text="Undo", command=self.undo_btn)
+        # self.undo_btn.pack(fill ='x', padx=5, pady=5)
+        self.undo_btn.grid(row=0, column=1, sticky='ew',padx=5, pady=5)
+
+        # Configure the style for the single frame
+
+        # self.single_frame = ttk.Frame(self.btn_frame, style="Frame2.TFrame")
+        # self.single_frame.grid(row=0,column=1)
+        self.bplus_btn = ttk.Button(self.btn_frame, text="B+", command=self.brush_plus)
+        self.bplus_btn.grid(row=0, column=2, sticky='ew', padx=5, pady=5)
+
+        self.bminus_btn = ttk.Button(self.btn_frame, text="B-", command=self.brush_minus)
+        self.bminus_btn.grid(row=1, column=2, sticky='ew', padx=5, pady=5)
+
+        self.output_label = ttk.Label(master=self.btn_frame, textvariable=self.output_string, anchor='center', font=tkfont.Font(size=14))
+        self.output_label.grid(row=0, column=3, sticky='nsew', rowspan=2, padx=8, pady=8)
+
+        # self.colorshow_btn = ttk.Button(self.btn_frame, text="colorshow_btn", command=self.change_colour)
+        # self.colorshow_btn.grid(row=0, column=4, padx=10)
+
+
+        #self.output_colour.set(str())
+
+        self.label_colour = ttk.Label(self.btn_frame, background=self.current_color)
+        self.label_colour.grid(row=0, column=4, sticky="ew",padx=5)
+
+
+
+        # self.colour_frame = ttk.Frame(self.btn_frame, style="Frame3.TFrame")
+        # self.colour_frame.grid(row=0, column=2, sticky=W + E)
+
+        self.color_btn = ttk.Button(self.btn_frame, text="Choose Colour", command=self.change_colour)
+        self.color_btn.grid(row=0, column=5,sticky="ew", padx=10)
+
+        self.color_btn1 = ttk.Button(self.btn_frame, text="Red",
+                                     command=lambda: self.change_static_colour("#FF0000"))
+        self.color_btn1.grid(row=0, column=6,sticky="ew",padx=2)
+
+        self.color_btn2 = ttk.Button(self.btn_frame, text="Yellow",
+                                     command=lambda: self.change_static_colour("#FFFF00"))
+        self.color_btn2.grid(row=0, column=7,sticky="ew",padx=2)
+
+        self.color_btn3 = ttk.Button(self.btn_frame, text="Blue",
+                                     command=lambda: self.change_static_colour("#006CFF"))
+        self.color_btn3.grid(row=0, column=8,sticky="ew",padx=2)
+
+        self.color_btn4 = ttk.Button(self.btn_frame, text="Green",
+                                     command=lambda: self.change_static_colour("#2e9134"))
+        self.color_btn4.grid(row=1, column=6, sticky="ew", padx=2)
+
+        self.color_btn5 = ttk.Button(self.btn_frame, text="Black",
+                                     command=lambda: self.change_static_colour("#000000"))
+        self.color_btn5.grid(row=1, column=7, sticky="ew", padx=2)
+
+        self.color_btn6 = ttk.Button(self.btn_frame, text="Purple",
+                                     command=lambda: self.change_static_colour("#5300eb"))
+        self.color_btn6.grid(row=1, column=8, sticky="ew", padx=2)
+
+
+
+        #drawing canvas
+        self.cnv = Canvas(self.wrapper, width=WIDTH-10, height=HEIGHT-10, bg='white')
         self.cnv.pack(pady = 50)
         #self.cnv.pack(fill=BOTH, expand=True)
         self.cnv.bind("<B1-Motion>", self.paint)
@@ -77,47 +164,9 @@ class PaintGUI:
         self.draw = ImageDraw.Draw(self.image)
 
 
-
-
-
-        self.output_string = ttk.StringVar()
-        self.output_string.set(str(self.brush_width))
-        self.output_label = ttk.Label(master=self.btn_frame, textvariable=self.output_string)
-        self.output_label.pack()
-
-        self.btn_frame.columnconfigure(0, weight=1)
-        self.btn_frame.columnconfigure(1, weight=1)
-        self.btn_frame.columnconfigure(2, weight=1)
-        self.btn_frame.columnconfigure(3, weight=1)
-
-        self.output_label.grid(row=2, column=2, sticky=W+E)
-
-
-
-        self.clear_btn = Button(self.btn_frame, text="Clear", command = self.clear)
-        self.clear_btn.grid(row=0, column=0, sticky=W+E)
-
-
-        self.bplus_btn = Button(self.btn_frame, text="B+", command=self.brush_plus)
-        self.bplus_btn.grid(row=0, column=2, sticky=W+E)
-
-        self.bminus_btn = Button(self.btn_frame, text="B-", command=self.brush_minus)
-        self.bminus_btn.grid(row=0, column=3, sticky=W+E)
-
-        self.color_btn = Button(self.btn_frame, text="Colour", command=self.change_colour)
-        self.color_btn.grid(row=1, column=0, sticky=W+E)
-
-        self.color_btn1 = Button(self.btn_frame, text="Red", command=lambda: self.change_static_colour("#FF0000"))
-        self.color_btn1.grid(row=1, column=1, sticky=W+E)
-
-        self.color_btn2 = Button(self.btn_frame, text="Yellow", command=lambda: self.change_static_colour("#FFFF00"))
-        self.color_btn2.grid(row=1, column=2, sticky=W+E)
-
-        self.color_btn3 = Button(self.btn_frame, text="Blue", command=lambda: self.change_static_colour("#006CFF"))
-        self.color_btn3.grid(row=1, column=3, sticky=W+E)
-
-        self.undo_btn = Button(self.btn_frame, text="Undo", command=self.undo_btn)
-        self.undo_btn.grid(row=2, column=0, sticky=W+E)
+        #
+        # self.undo_btn = Button(self.btn_frame, text="Undo", command=self.undo_btn)
+        # self.undo_btn.grid(row=2, column=0, sticky=W+E)
 
         self.window.protocol('WM_DELETE_WINDOW', self.on_closing)
 
@@ -238,11 +287,16 @@ class PaintGUI:
 
     def change_colour(self):
         _, self.current_color = colorchooser.askcolor(title="Choose A color")
+        self.update_colour(self.current_color)
         #print(self.current_color)
         #print(type(self.current_color))
 
+    def update_colour(self, colour):
+        self.label_colour.config(background=colour)
+
     def change_static_colour(self, colour):
         self.current_color = colour
+        self.update_colour(self.current_color)
 
     def on_closing(self):
         answer = messagebox.askyesnocancel("Quit", "Do you want to save your work", parent=self.window)
